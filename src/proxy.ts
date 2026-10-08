@@ -1,0 +1,22 @@
+import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
+
+export async function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  if (pathname === "/admin/login") return NextResponse.next();
+
+  const token = req.cookies.get("admin_session")?.value;
+  const secret = process.env.AUTH_SECRET;
+
+  if (token && secret) {
+    try {
+      await jwtVerify(token, new TextEncoder().encode(secret));
+      return NextResponse.next();
+    } catch {
+      // token inválido ou expirado
+    }
+  }
+  return NextResponse.redirect(new URL("/admin/login", req.url));
+}
+
+export const config = { matcher: ["/admin/:path*"] };

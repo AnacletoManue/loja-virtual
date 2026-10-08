@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Produtos ----------
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int // em Kwanzas (sem decimais)
+  stock       Int      @default(0)
+  imageUrl    String? // URL do Vercel Blob
+  active      Boolean  @default(true) // false = escondido da loja
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([active, createdAt])
+}
+
+// ---------- Pedidos ----------
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  BANK_TRANSFER
+  MULTICAIXA_EXPRESS
+  REFERENCE
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   Int           @unique @default(autoincrement()) // número amigável (#1001...)
+  customerName  String
+  phone         String
+  address       String // endereço ou local de entrega
+  notes         String?
+  paymentMethod PaymentMethod
+  status        OrderStatus   @default(PENDING)
+  total         Int // em Kwanzas, calculado no servidor
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items OrderItem[]
+
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String?
+  // Cópia dos dados no momento da compra (não muda se o produto for editado)
+  name      String
+  unitPrice Int
+  quantity  Int
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+// ---------- Administração ----------
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}

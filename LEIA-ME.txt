@@ -1,0 +1,5 @@
+PAGINA INICIAL + PRODUTOS
+
+1) Copie a pasta "src" deste zip para ~/loja-roupa (aceite substituir).
+2) Edite src/lib/site.ts: nome da loja, cidade e numero de WhatsApp.
+3) Reinicie: rm -rf .next && npm run dev
