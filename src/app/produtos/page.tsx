@@ -20,36 +20,38 @@ export default async function ProductsPage({
     take: 200,
   });
 
-  // disponíveis primeiro, esgotados no fim
   const products = [...all.filter((p) => p.stock > 0), ...all.filter((p) => p.stock === 0)];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Produtos</h1>
-          <p className="text-sm text-neutral-500">
-            {products.length} {products.length === 1 ? "peça encontrada" : "peças encontradas"}
+          <h1 className="font-display text-5xl font-extrabold">Produtos</h1>
+          <p className="mt-1 text-neutral-500">
+            {products.length} {products.length === 1 ? "peça" : "peças"}
+            {term && <> para “{term}”</>}
           </p>
         </div>
 
-        <form action="/produtos" className="flex gap-2">
+        <form action="/produtos" className="flex w-full gap-2 sm:w-auto">
           <input
             name="q"
             defaultValue={term}
-            placeholder="Pesquisar peça..."
-            className="w-full rounded-full border bg-white px-4 py-2 text-sm outline-none focus:border-black sm:w-64"
+            placeholder="Pesquisar peça"
+            className="w-full rounded-full border border-black/10 bg-white px-5 py-3 text-sm outline-none transition focus:border-black sm:w-72"
           />
-          <button className="rounded-full bg-black px-5 py-2 text-sm font-medium text-white">Buscar</button>
+          <button className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand)]">
+            Buscar
+          </button>
         </form>
       </div>
 
       {products.length === 0 ? (
-        <p className="rounded-2xl border bg-white py-16 text-center text-neutral-500">
-          {term ? `Nenhuma peça encontrada para “${term}”.` : "Ainda não há produtos disponíveis."}
+        <p className="rounded-3xl bg-white py-20 text-center text-neutral-500">
+          {term ? `Nenhuma peça encontrada para “${term}”. Tente outro nome.` : "Ainda não há produtos disponíveis."}
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

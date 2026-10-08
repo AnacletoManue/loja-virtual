@@ -5,46 +5,55 @@ import { useCart } from "@/store/cart";
 import { useMounted } from "@/lib/useMounted";
 import { SITE } from "@/lib/site";
 
+const NAV = [
+  { href: "/", label: "Início" },
+  { href: "/produtos", label: "Produtos" },
+];
+
 export default function Header() {
   const path = usePathname();
   const mounted = useMounted();
-  const count = useCart((s) => s.items.reduce((n, i) => n + i.quantity, 0));
-
+  const { items } = useCart();
   if (path.startsWith("/admin")) return null;
 
-  const link = (href: string, label: string) => (
-    <Link
-      href={href}
-      className={`rounded-full px-3 py-1.5 text-sm transition hover:bg-neutral-100 ${
-        path === href ? "font-semibold text-black" : "text-neutral-600"
-      }`}
-    >
-      {label}
-    </Link>
-  );
+  const count = mounted ? items.reduce((s, i) => s + i.quantity, 0) : 0;
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="text-xl font-bold tracking-tight">
+    <header className="sticky top-0 z-40 border-b border-black/5 bg-[var(--paper)]/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+        <Link href="/" className="font-display text-2xl font-extrabold">
           {SITE.name}
         </Link>
 
-        <nav className="flex items-center gap-1">
-          {link("/", "Início")}
-          {link("/produtos", "Produtos")}
+        <nav className="flex items-center gap-1 text-sm font-medium">
+          {NAV.map((n) => {
+            const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={`rounded-full px-4 py-2 transition ${
+                  active ? "bg-black text-white" : "text-neutral-600 hover:bg-black/5"
+                }`}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
           <Link
             href="/carrinho"
-            className="ml-1 flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium transition hover:bg-neutral-50"
+            aria-label={`Carrinho, ${count} artigos`}
+            className="ml-1 flex h-10 items-center gap-2 rounded-full border border-black/10 bg-white px-4 transition hover:border-black"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 7h12l-1 13H7L6 7Z" />
+              <path d="M9 7a3 3 0 0 1 6 0" />
             </svg>
             <span className="hidden sm:inline">Carrinho</span>
-            {mounted && count > 0 && (
-              <span className="rounded-full bg-black px-2 py-0.5 text-xs text-white">{count}</span>
+            {count > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--brand)] px-1 text-[11px] font-bold text-white">
+                {count}
+              </span>
             )}
           </Link>
         </nav>

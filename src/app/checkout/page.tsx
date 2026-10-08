@@ -12,7 +12,8 @@ const PAYMENTS = [
   { value: "REFERENCE", label: "Pagamento por referência" },
 ];
 
-const input = "w-full rounded-lg border bg-white px-3 py-2 outline-none focus:border-black";
+const input =
+  "w-full rounded-2xl border border-black/10 bg-white px-4 py-3.5 outline-none transition focus:border-black";
 
 export default function CheckoutPage() {
   const mounted = useMounted();
@@ -52,7 +53,7 @@ export default function CheckoutPage() {
 
     if (!res.ok) {
       setLoading(false);
-      setError(data.error ?? "Não foi possível finalizar o pedido.");
+      setError(data.error ?? "Não foi possível finalizar o pedido. Tente novamente.");
       return;
     }
 
@@ -61,15 +62,13 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Finalizar compra</h1>
-
+    <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[1fr_340px]">
       <form onSubmit={onSubmit} className="space-y-4">
+        <h1 className="font-display mb-2 text-5xl font-extrabold">Finalizar compra</h1>
         <input name="customerName" required placeholder="Nome completo" className={input} />
         <input name="phone" required type="tel" placeholder="Telefone (ex.: 923 000 000)" className={input} />
         <input name="address" required placeholder="Endereço ou local de entrega" className={input} />
-        <textarea name="notes" placeholder="Observações (opcional)" rows={2} className={input} />
-
+        <textarea name="notes" placeholder="Observações (opcional)" rows={3} className={input} />
         <select name="paymentMethod" required defaultValue="" className={input}>
           <option value="" disabled>Método de pagamento</option>
           {PAYMENTS.map((p) => (
@@ -77,20 +76,31 @@ export default function CheckoutPage() {
           ))}
         </select>
 
-        <div className="flex items-center justify-between rounded-xl border bg-white p-4 font-bold">
-          <span>Total</span>
-          <span>{formatKz(cartTotal(items))}</span>
-        </div>
-
-        {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{error}</p>}
 
         <button
           disabled={loading}
-          className="w-full rounded-lg bg-black py-3 font-medium text-white disabled:opacity-50"
+          className="w-full rounded-full bg-[var(--brand)] py-4 font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
         >
           {loading ? "A enviar..." : "Confirmar pedido"}
         </button>
       </form>
+
+      <aside className="h-fit space-y-4 rounded-3xl bg-white p-6 lg:sticky lg:top-24">
+        <h2 className="font-display text-xl font-bold">O seu pedido</h2>
+        <ul className="space-y-2 text-sm">
+          {items.map((i) => (
+            <li key={i.productId} className="flex justify-between gap-3">
+              <span className="text-neutral-600">{i.quantity} × {i.name}</span>
+              <span className="font-medium">{formatKz(i.price * i.quantity)}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex justify-between border-t border-black/10 pt-4 text-lg font-bold">
+          <span>Total</span>
+          <span>{formatKz(cartTotal(items))}</span>
+        </div>
+      </aside>
     </div>
   );
 }

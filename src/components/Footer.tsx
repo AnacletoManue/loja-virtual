@@ -8,36 +8,34 @@ export default function Footer() {
   if (path.startsWith("/admin")) return null;
 
   return (
-    <footer className="mt-12 border-t bg-white">
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-3">
+    <footer className="mt-16 bg-[var(--ink)] text-white">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-[2fr_1fr_1fr] md:px-6">
         <div>
-          <p className="text-lg font-bold">{SITE.name}</p>
-          <p className="mt-2 text-sm text-neutral-600">{SITE.tagline}</p>
+          <p className="font-display text-3xl font-extrabold">{SITE.name}</p>
+          <p className="mt-3 max-w-xs text-sm text-white/60">{SITE.tagline}</p>
         </div>
-
         <div className="text-sm">
-          <p className="mb-2 font-semibold">Navegar</p>
-          <ul className="space-y-1 text-neutral-600">
-            <li><Link href="/" className="hover:text-black">Início</Link></li>
-            <li><Link href="/produtos" className="hover:text-black">Produtos</Link></li>
-            <li><Link href="/carrinho" className="hover:text-black">Carrinho</Link></li>
+          <p className="mb-3 font-semibold">Navegar</p>
+          <ul className="space-y-2 text-white/60">
+            <li><Link href="/" className="hover:text-white">Início</Link></li>
+            <li><Link href="/produtos" className="hover:text-white">Produtos</Link></li>
+            <li><Link href="/carrinho" className="hover:text-white">Carrinho</Link></li>
           </ul>
         </div>
-
         <div className="text-sm">
-          <p className="mb-2 font-semibold">Contacto</p>
-          <p className="text-neutral-600">{SITE.city}</p>
+          <p className="mb-3 font-semibold">Contacto</p>
+          <p className="text-white/60">{SITE.city}</p>
           <a
             href={whatsappLink()}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 inline-block rounded-full bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700"
+            className="mt-4 inline-block rounded-full bg-white px-5 py-2.5 font-semibold text-black transition hover:bg-[var(--brand)] hover:text-white"
           >
             Falar no WhatsApp
           </a>
         </div>
       </div>
-      <p className="border-t py-4 text-center text-xs text-neutral-500">
+      <p className="border-t border-white/10 py-5 text-center text-xs text-white/40">
         © {new Date().getFullYear()} {SITE.name}. Todos os direitos reservados.
       </p>
     </footer>
