@@ -1,5 +1,10 @@
-PAGINA INICIAL + PRODUTOS
-
-1) Copie a pasta "src" deste zip para ~/loja-roupa (aceite substituir).
-2) Edite src/lib/site.ts: nome da loja, cidade e numero de WhatsApp.
-3) Reinicie: rm -rf .next && npm run dev
+1) Copie os ficheiros novos/substituidos:
+      unzip -o ~/Downloads/loja-seguranca-v2.zip -d /tmp/seg2
+      cp -r /tmp/seg2/src/. src/
+      cp /tmp/seg2/prisma/schema.prisma prisma/schema.prisma
+      cp /tmp/seg2/aplicar-seguranca.mjs .
+2) Altere os ficheiros com design (so as linhas de seguranca):
+      node aplicar-seguranca.mjs
+3) Migracao:
+      npx prisma migrate dev --name seguranca
+4) rm -rf .next && npm run dev

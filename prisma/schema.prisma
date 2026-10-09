@@ -44,6 +44,8 @@ enum PaymentMethod {
 model Order {
   id            String        @id @default(cuid())
   orderNumber   Int           @unique @default(autoincrement()) // número amigável (#1001...)
+  // Código secreto usado nos links públicos (/pedido/<token> e PDF)
+  publicToken   String        @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   customerName  String
   phone         String
   address       String // endereço ou local de entrega
@@ -57,6 +59,7 @@ model Order {
   items OrderItem[]
 
   @@index([status, createdAt])
+  @@index([phone, status])
 }
 
 model OrderItem {
@@ -81,4 +84,14 @@ model Admin {
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+}
+
+// ---------- Limite de tentativas ----------
+
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
 }

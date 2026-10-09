@@ -7,10 +7,17 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createSession, destroySession, requireAdmin } from "@/lib/auth";
 import type { OrderStatus } from "@/lib/db-types";
+import { hit, reset, getClientIp, HOUR } from "@/lib/ratelimit";
 
 /* ---------- Login / Logout ---------- */
 
 let dummyHash: string | undefined;
+
+const LOGIN_PER_IP_HOUR = 3;      // tentativas por hora, por IP
+const LOGIN_PER_EMAIL_HOUR = 10;  // proteção extra contra ataques de vários IPs
+
+const tooMany = (sec: number) =>
+  `Demasiadas tentativas. Tente novamente dentro de ${Math.ceil(sec / 60)} minuto(s).`;
 
 export async function loginAction(
   _prev: { error?: string } | undefined,
@@ -18,6 +25,19 @@ export async function loginAction(
 ): Promise<{ error: string }> {
   const email = String(fd.get("email") ?? "").trim();
   const password = String(fd.get("password") ?? "");
+
+  // Conta a tentativa ANTES de verificar a senha (evita ataques em paralelo)
+  const ip = await getClientIp();
+  const ipKey = `login:ip:${ip}`;
+  const emailKey = `login:email:${email.toLowerCase()}`;
+
+  const byIp = await hit(ipKey, LOGIN_PER_IP_HOUR, HOUR);
+  if (!byIp.allowed) return { error: tooMany(byIp.retryAfterSec) };
+
+  if (email) {
+    const byEmail = await hit(emailKey, LOGIN_PER_EMAIL_HOUR, HOUR);
+    if (!byEmail.allowed) return { error: tooMany(byEmail.retryAfterSec) };
+  }
 
   const admin = email
     ? await prisma.admin.findFirst({ where: { email: { equals: email, mode: "insensitive" } } })
@@ -27,8 +47,16 @@ export async function loginAction(
   dummyHash ??= bcrypt.hashSync("dummy-password", 12);
   const ok = await bcrypt.compare(password, admin?.passwordHash ?? dummyHash);
 
-  if (!admin || !ok) return { error: "Email ou senha incorretos." };
+  if (!admin || !ok) {
+    return {
+      error:
+        byIp.remaining > 0
+          ? `Email ou senha incorretos. Restam ${byIp.remaining} tentativa(s).`
+          : "Email ou senha incorretos. Limite atingido: tente novamente dentro de 1 hora.",
+    };
+  }
 
+  await reset([ipKey, emailKey]);
   await createSession(admin.id, admin.email);
   redirect("/admin");
 }

@@ -281,7 +281,7 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
       </div>
 
       <a
-        href={`/api/pedidos/${order.publicToken}/pdf`}
+        href={`/api/pedidos/${order.id}/pdf`}
         className="group inline-flex items-center gap-2 rounded-full border bg-white px-5 py-2.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-black"
       >
         <Icon name="download" className="h-4 w-4 transition group-hover:translate-y-0.5" />
